@@ -1,0 +1,51 @@
+import { User } from '../models/user.js';
+import { createSession } from '../services/auth.js';
+import { setSessionCookies } from '../services/auth.js';
+import createHttpError from 'http-errors';
+import bcrypt from 'bcrypt';
+import { Session } from '../models/session.js';
+
+export const registerUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw createHttpError(400, "Email in use");
+  };
+
+  const hashedPassword = bcrypt.hash(password);
+
+  const newUser = await User.create({
+    email,
+    password: hashedPassword,
+  });
+
+  const newSession = createSession(newUser._id);
+
+  setSessionCookies(res, newSession);
+
+  res.status(201).json(newUser);
+};
+
+export const loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw createHttpError(401, 'Invalid credentials');
+  };
+
+  const isValidPassword = bcrypt.compare(user.password, password);
+  if (!isValidPassword) {
+    throw createHttpError(401, 'Invalid credentials');
+  };
+
+  await Session.deleteOne({ userId: user._id });
+
+  const newSession = await Session.create(user._id);
+
+  setSessionCookies(res, newSession);
+
+  res.status(201).json(user);
+};
+
