@@ -2,23 +2,29 @@ import { Schema } from "mongoose";
 import { model } from "mongoose";
 import { TAGS } from "../constants/tags.js";
 
-const noteSchema = new Schema({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const noteSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    content: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    tag: {
+      type: String,
+      enum: TAGS,
+      default: 'Todo',
+    },
   },
-  content: {
-    type: String,
-    default: '',
-    trim: true,
-  },
-  tag: {
-    type: String,
-    enum: TAGS,
-    default: "Todo",
-  },
-},
   {
     timestamps: true,
   },
