@@ -86,3 +86,7 @@ export const logoutUser = async (req, res) => {
 
   res.status(204).send();
 };
+
+export const requestResetEmail = async (req, res) => {
+
+};
